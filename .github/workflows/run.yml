@@ -18,3 +18,21 @@ jobs:
         if: contains(github.event.comment.body, '/test')  # check the comment if it contains the keywords
         run: |
           echo test
+  check_pull_requests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check Pull Requests
+        run: |
+          PRS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/yourusername/yourrepository/pulls?state=open&labels=Ready%20to%20Merge")
+          
+          # Do something with the $PRS variable, e.g., print the list of PRs
+          echo "Pull Requests with 'Ready to Merge' label:"
+          echo "$PRS"
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
