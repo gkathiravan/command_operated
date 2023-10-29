@@ -28,7 +28,7 @@ jobs:
       - name: Check Pull Requests
         run: |
           PRS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/gkathiravan/command_operated/pulls?state=open&labels=Ready%20to%20Merge" | jq -r '.[].title')
+            "https://api.github.com/repos/gkathiravan/command_operated/pulls?state=open&labels=Ready%20to%20Merge" | jq -r '.[].head.ref')
           
           # Do something with the $PRS variable, e.g., print the list of PRs
           echo "Pull Requests with 'Ready to Merge' label:"
