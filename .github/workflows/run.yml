@@ -18,21 +18,20 @@ jobs:
         if: contains(github.event.comment.body, '/test')  # check the comment if it contains the keywords
         run: |
           echo test
-  check_pull_requests:
+  fetch-comments:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Check Pull Requests
-        run: |
-          PRS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/gkathiravan/command_operated/pulls?state=open" | jq -r '.[] | select(.labels[].name == "Ready to Merge") | .head.ref')
-          
-          # Do something with the $PRS variable, e.g., print the list of PRs
-          echo "Pull Requests with 'Ready to Merge' label:"
-          echo "$PRS"
-
+      - name: Fetch existing comments
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching comments from the PR Conversation tab..."
+          gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+            --jq '.[] | {id, body, created_at} | "Comment ID: \(.id)\nCreated At: \(.created_at)\nBody: \(.body)\n---"' \
+            | tee comments.log
+
+      - name: Output comments
+        run: |
+          echo "Comments fetched from the Conversation tab:"
+          cat comments.log
