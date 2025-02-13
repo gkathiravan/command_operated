@@ -1,7 +1,7 @@
 name: Fetch Commit IDs
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -12,12 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Fetch last 25 commit IDs
-        id: fetch-commits
+      - name: Fetch and display last 25 commit IDs
         run: |
           commit_ids=($(git log -n 25 --format="%H"))
-          echo "commit_ids=(${commit_ids[@]})" >> $GITHUB_ENV
-
-      - name: Display commit IDs
-        run: |
-          echo "Commit IDs: ${commit_ids[@]}"
+          echo "Commit IDs:"
+          for id in "${commit_ids[@]}"; do
+            echo "$id"
+          done
