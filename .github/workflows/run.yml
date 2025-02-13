@@ -1,38 +1,23 @@
-name: pull request comment
+name: Fetch Commit IDs
+
 on:
-  issue_comment:
-    types: [created, edited, deleted]
+  push:
+    branches:
+      - main
 
 jobs:
-  job01:
-    if: contains(github.event.comment.html_url, '/pull/')  # check if the comments come from pull request, exclude those from issue.
-    runs-on: [ubuntu-latest]
-    
-    steps:
-      - name: say hello
-        if: contains(github.event.comment.body, '/support')  # check the comment if it contains the keywords
-        run: |
-          echo say hello
-
-      - name: test
-        if: contains(github.event.comment.body, '/test')  # check the comment if it contains the keywords
-        run: |
-          echo test
-  check_pull_requests:
+  fetch-commit-ids:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Check Pull Requests
+      - name: Fetch last 25 commit IDs
+        id: fetch-commits
         run: |
-          PRS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/gkathiravan/command_operated/pulls?state=open" | jq -r '.[] | select(.labels[].name == "Ready to Merge") | .head.ref')
-          
-          # Do something with the $PRS variable, e.g., print the list of PRs
-          echo "Pull Requests with 'Ready to Merge' label:"
-          echo "$PRS"
+          commit_ids=($(git log -n 25 --format="%H"))
+          echo "commit_ids=(${commit_ids[@]})" >> $GITHUB_ENV
 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Display commit IDs
+        run: |
+          echo "Commit IDs: ${commit_ids[@]}"
